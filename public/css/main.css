@@ -1,0 +1,104 @@
+@font-face {
+    font-family: 'Cairo', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+*{
+    font-family: 'Cairo', sans-serif;
+}
+button{
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 34px; padding: 5px 12px;
+    background: var(--bg);
+    font-weight: 600 !important; font-size: 13px;
+    cursor: pointer;
+    text-wrap: nowrap;
+    transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    color: black;
+    border: 2px outset #d4d1d1;
+    border-radius: 8px;
+    max-width: 100px;
+    text-align: center;
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 5px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    text-wrap: nowrap;
+    transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    border-radius: 8px;
+    max-width: 120px;
+    text-align: center;
+}
+
+/* زر الحفظ / Primary */
+.btn-primary {
+    background: #674846;
+    border: 2px outset #5a3f3d;
+    color: #fff;
+}
+.btn-primary:hover { background: #5a3f3d; }
+.btn-primary:active { background: #4e3331; }
+
+/* زر التعديل / Secondary */
+.btn-secondary {
+    background: #e6ac00;
+    border: 2px outset #d4d1d1;
+    color: white;
+}
+.btn-secondary:hover { background: #f7e4e4; }
+.btn-secondary:active { background: #f0dcdc; }
+
+/* زر الحذف / Danger */
+.btn-danger {
+    background: #d9534f;
+    border: 2px outset #c12b2b;
+    color: #fff;
+}
+.btn-danger:hover { background: #c12b2b; }
+.btn-danger:active { background: #a82626; }
+
+/* زر الإلغاء / Cancel */
+.btn-cancel {
+    background: #e0e0e0;
+    border: 2px outset #bdbdbd;
+    color: #674846;
+}
+.btn-cancel:hover { background: #d5d5d5; }
+.btn-cancel:active { background: #c0c0c0; }
+
+/* زر المعلومات / Info */
+.btn-info {
+    background: #26A69A;
+    border: 2px outset #1e8f86;
+    color: #fff;
+}
+.btn-info:hover { background: #1e8f86; }
+.btn-info:active { background: #17796f; }
+
+/* زر التنبيه / Warning */
+.btn-warning {
+    background: #FFC107;
+    border: 2px outset #e6ac00;
+    color: #212121;
+}
+.btn-warning:hover { background: #e6ac00; }
+.btn-warning:active { background: #cc9900; }
+div#success-alert {
+    color: white;
+    background: linear-gradient(149deg, #1296048f, #46850fa1);
+    height: 45px;
+    text-align: center;
+    align-content: center;
+    border-radius: 9px;
+    position: absolute;
+    padding: 0 20px;
+    left: 3%;
+    animation: fadeIn 0.5s ease-in-out;
+}

@@ -1,0 +1,10 @@
+
+.td-select{
+    width:35%;
+}
+
+@media(max-width: 640px){
+    .td-select{
+        width:100%;
+    }
+}
