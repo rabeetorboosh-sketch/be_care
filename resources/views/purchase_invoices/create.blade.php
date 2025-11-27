@@ -41,6 +41,17 @@
                 </div>
 
                 <div class="form-group">
+                    <label>الصندوق</label>
+                    <select name="cash_box_id" required>
+                        @foreach($cashBoxes as $box)
+                            <option value="{{ $box->id }}" @selected(old('cash_box_id') == $box->id or $box->is_main==1 )>
+                                {{ $box->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>تاريخ الفاتورة</label>
                     <input type="date" name="invoice_date" value="{{ old('invoice_date', now()->format('Y-m-d')) }}">
                 </div>

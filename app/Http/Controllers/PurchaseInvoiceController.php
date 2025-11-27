@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashBox;
 use App\Models\LedgerEntry;
 use App\Models\Part;
 use App\Models\Supplier;
@@ -39,6 +40,7 @@ class PurchaseInvoiceController extends Controller
         $request->validate([
             'supplier_id' => 'required',
             'warehouse_id' => 'required|exists:warehouses,id',
+            'cash_box_id' => 'nullable',
             'invoice_date' => 'required',
             'payment_type' => 'required',
             'total_amount' => 'required|numeric',
@@ -66,7 +68,19 @@ class PurchaseInvoiceController extends Controller
 
                 // إنشاء الأجزاء إذا وجدت
                 if ($request->has('parts')) {
-                    $invoice->parts()->createMany($request->parts);
+                    foreach ($request->parts as $partData) {
+                        // إنشاء جزء للفاتورة
+                        $part = $invoice->parts()->create($partData);
+
+                        // إنشاء سجل جديد في warehouse_part لكل جزء
+                        WarehousePart::create([
+                            'warehouse_id' => $request->warehouse_id,
+                            'part_id' => $partData['part_id'],
+                            'quantity' => $partData['quantity'],
+                            'reference_id' => $invoice->id,
+                            'reference_type' => PurchaseInvoice::class,
+                        ]);
+                    }
                 }
 
                 $supplierName = $invoice->supplier?->name ?? '  مورد نقدي';
@@ -148,18 +162,8 @@ class PurchaseInvoiceController extends Controller
             return back()->withErrors(['payment_type' => 'لا يمكن أن يكون الدفع آجل اذا كان المورد بقيمة 0']);
         }
 
-        // حذف مخزون الفاتورة السابقة
-        foreach ($invoice->parts as $oldItem) {
-            $pivot = WarehousePart::where('warehouse_id', $invoice->warehouse_id)
-                ->where('part_id', $oldItem->part_id)
-                ->first();
 
-            if ($pivot) {
-                $pivot->quantity -= $oldItem->quantity;
-                if ($pivot->quantity < 0) $pivot->quantity = 0;
-                $pivot->save();
-            }
-        }
+
 
         // تحديث بيانات الفاتورة الأساسية
         $invoice->update([
@@ -172,6 +176,9 @@ class PurchaseInvoiceController extends Controller
 
         // حذف الأجزاء القديمة
         $invoice->parts()->delete();
+        WarehousePart::where('reference_id', $invoice->id)
+            ->where('reference_type', PurchaseInvoice::class)
+            ->delete();
 
         $totalAmount = 0;
 
@@ -187,16 +194,14 @@ class PurchaseInvoiceController extends Controller
                 'total_price' => $total,
             ]);
 
+            WarehousePart::create([
+                'warehouse_id' => $request->warehouse_id,
+                'part_id' => $item['part_id'],
+                'quantity' => $item['quantity'],
+                'reference_id' => $invoice->id,
+                'reference_type' => PurchaseInvoice::class,
+            ]);
 
-            WarehousePart::updateOrCreate(
-                [
-                    'warehouse_id' => $invoice->warehouse_id,
-                    'part_id' => $item['part_id']
-                ],
-                [
-                    'quantity' => DB::raw("quantity + {$item['quantity']}")
-                ]
-            );
         }
 
         // تحديث الإجمالي النهائي
@@ -204,17 +209,33 @@ class PurchaseInvoiceController extends Controller
 
         $invoice->save();
 
-        // حذف القيود المحاسبية القديمة
         $invoice->ledgerEntries()->delete();
+        $supplierName = $invoice->supplier?->name ?? '  مورد نقدي';
+// إنشاء القيد للمورد إذا كان الدفع آجل
+        if ($request->payment_type == 'credit' && $request->supplier_id > 0 && $invoice->remaining_amount > 0) {
+            LedgerEntry::create([
+                'accountable_id' => $invoice->supplier_id,
+                'accountable_type' => Supplier::class,
+                'description' => "فاتورة شراء من {$supplierName}",
+                'debit' => $invoice->remaining_amount,
+                'credit' => 0,
+                'reference_id' => $invoice->id,
+                'reference_type' => PurchaseInvoice::class,
+            ]);
+        }
 
-        // إنشاء قيد جديد
-        $invoice->ledgerEntries()->create([
-            'accountable_id' => $invoice->supplier_id,
-            'accountable_type' => $invoice->supplier_id == 0 ? 'cash_box' : 'supplier',
-            'description' => 'تحديث فاتورة مشتريات رقم ' . $invoice->id,
-            'debit'  => $invoice->total_amount,
-            'credit' => $invoice->paid_amount,
-        ]);
+// إنشاء القيد للصندوق إذا كان هناك دفعة نقدية
+        if ($request->paid_amount > 0 && $request->cash_box_id) {
+            LedgerEntry::create([
+                'accountable_id' => $request->cash_box_id,
+                'accountable_type' => CashBox::class,
+                'description' => "فاتورة شراء من {$supplierName}",
+                'debit' => $request->paid_amount,
+                'credit' => 0,
+                'reference_id' => $invoice->id,
+                'reference_type' => PurchaseInvoice::class,
+            ]);
+        }
 
         return redirect()->route('purchase_invoices.index')->with('success', 'تم تحديث الفاتورة بنجاح');
     }
@@ -229,7 +250,21 @@ class PurchaseInvoiceController extends Controller
     // حذف الفاتورة
     public function destroy(PurchaseInvoice $purchase_invoice)
     {
-        $purchase_invoice->delete();
+        DB::transaction(function () use ($purchase_invoice) {
+            // حذف الأجزاء المرتبطة بالفاتورة
+            $purchase_invoice->parts()->delete();
+
+            // حذف سجلات المخزون المرتبطة بالفاتورة
+            WarehousePart::where('reference_id', $purchase_invoice->id)
+                ->where('reference_type', PurchaseInvoice::class)
+                ->delete();
+
+            // حذف القيود المحاسبية المرتبطة بالفاتورة
+            $purchase_invoice->ledgerEntries()->delete();
+
+            // حذف الفاتورة نفسها
+            $purchase_invoice->delete();
+        });
         return redirect()->route('purchase_invoices.index')->with('success', 'تم حذف الفاتورة بنجاح.');
     }
 }

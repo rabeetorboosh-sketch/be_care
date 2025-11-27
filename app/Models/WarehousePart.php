@@ -11,7 +11,9 @@ class WarehousePart extends Model
     protected $fillable = [
         'warehouse_id',
         'part_id',
-        'quantity'
+        'quantity',
+        'reference_id',
+        'reference_type',
     ];
 
     public function warehouse()

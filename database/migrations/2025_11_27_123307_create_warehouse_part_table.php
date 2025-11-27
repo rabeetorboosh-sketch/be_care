@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('warehouse_id')->constrained()->cascadeOnDelete();
             $table->foreignId('part_id')->constrained()->cascadeOnDelete();
-            $table->integer('quantity')->default(0); // الكمية الحالية
+            $table->integer('quantity')->default(0);
+            $table->integer('reference_id');
+            $table->string('reference_type');
             $table->timestamps();
         });
 
