@@ -12,6 +12,8 @@ class PurchaseInvoice extends Model
         'invoice_date',
         'total_amount',
         'payment_status',
+        'payment_status',
+        'cash_box_id',
         'paid_amount'
     ];
 
@@ -29,9 +31,16 @@ class PurchaseInvoice extends Model
     {
         return $this->hasMany(PurchaseInvoicePart::class);
     }
+    public function items()
+    {
+        return $this->hasMany(PurchaseInvoiceItem::class);
+    }
     public function ledgerEntries()
     {
         return $this->morphMany(LedgerEntry::class, 'reference');
     }
-
+    public function cashBox()
+    {
+        return $this->belongsTo(CashBox::class,'cash_box_id');
+    }
 }

@@ -30,8 +30,14 @@
                         <span class="info-title">المورد</span>
                         <span class="info-content">{{ $invoice->supplier?->name ?? '-' }}</span>
                     </div>
-                     <div class="info-card">
-                        <span class="info-title">المخزن </span>
+
+                    <div class="info-card">
+                        <span class="info-title">الصندوق</span>
+                        <span class="info-content">{{ $invoice->cashBox?->name ?? '-' }}</span>
+                    </div>
+
+                    <div class="info-card">
+                        <span class="info-title">المخزن</span>
                         <span class="info-content">{{ $invoice->warehouse?->name ?? '-' }}</span>
                     </div>
 
@@ -49,16 +55,49 @@
 
                     <div class="info-card">
                         <span class="info-title">المبلغ المتبقي</span>
-                        <span class="info-content">{{ number_format(number_format($invoice->total_amount, 2)-number_format($invoice->paid_amount, 2), 2) }}</span>
+                        <span class="info-content">{{ number_format($invoice->total_amount - $invoice->paid_amount, 2) }}</span>
                     </div>
-
                 </div>
 
-
-
-                {{-- جدول الأصناف --}}
+                {{-- جدول القطع --}}
                 @if($invoice->parts?->isNotEmpty())
-                    <h3 class="section-title">الأصناف</h3>
+                    <h3 class="section-title">القطع</h3>
+
+                    <div class="table-wrap">
+                        <div class="table-scroll">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>القطعة</th>
+                                    <th>الكمية</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>الإجمالي</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach ($invoice->parts as $part)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $part->part?->name ?? '-' }}</td>
+                                        <td>{{ $part->quantity }}</td>
+                                        <td>{{ number_format($part->purchase_price, 2) }}</td>
+                                        <td>{{ number_format($part->total_price, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="font-bold">
+                                    <td colspan="4" class="text-right">الإجمالي الفرعي</td>
+                                    <td>{{ number_format($invoice->parts->sum('total_price'), 2) }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- جدول الأجهزة --}}
+                @if($invoice->items?->isNotEmpty())
+                    <h3 class="section-title">الأجهزة</h3>
 
                     <div class="table-wrap">
                         <div class="table-scroll">
@@ -67,26 +106,33 @@
                                 <tr>
                                     <th>#</th>
                                     <th>الصنف</th>
+                                    <th>الوحدة</th>
                                     <th>الكمية</th>
                                     <th>سعر الوحدة</th>
                                     <th>الإجمالي</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @foreach ($invoice->parts as $item)
+                                @foreach ($invoice->items as $item)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $item->part?->name ?? '-' }}</td>
+                                        <td>{{ $item->item?->name ?? '-' }}</td>
+                                        <td>{{ $item->unit?->unit?->name ?? '-' }}</td>
                                         <td>{{ $item->quantity }}</td>
-                                        <td>{{ number_format($item->purchase_price, 2) }}</td>
+                                        <td>{{ number_format($item->unit_price, 2) }}</td>
                                         <td>{{ number_format($item->total_price, 2) }}</td>
                                     </tr>
                                 @endforeach
+                                <tr class="font-bold">
+                                    <td colspan="5" class="text-right">الإجمالي الفرعي</td>
+                                    <td>{{ number_format($invoice->items->sum('total_price'), 2) }}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 @endif
+
 
                 <div class="mt-6">
                     <a href="{{ route('purchase_invoices.index') }}" class="btn btn-primary">العودة للفواتير</a>

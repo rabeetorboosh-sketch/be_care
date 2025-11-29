@@ -19,11 +19,16 @@
             @csrf
 
             {{-- بيانات الفاتورة --}}
-            <div class="row-2">
+            <div class="row-3">
+                <div class="form-group">
+                    <label>تاريخ الفاتورة</label>
+                    <input type="date" name="invoice_date" value="{{ old('invoice_date', now()->format('Y-m-d')) }}">
+                </div>
+
                 <div class="form-group">
                     <label>اختر المورد</label>
                     <select name="supplier_id" id="supplier_id">
-                        <option value="0">   مورد نقدي </option>
+                        <option value="0">مورد نقدي</option>
                         @foreach($suppliers as $supplier)
                             <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                         @endforeach
@@ -33,7 +38,6 @@
                 <div class="form-group">
                     <label>اختر المخزن</label>
                     <select name="warehouse_id" id="warehouse_id">
-
                         @foreach($warehouses as $warehouse)
                             <option value="{{ $warehouse->id }}" {{ $warehouse->is_main==1 ? 'selected' : '' }}>{{ $warehouse->name }}</option>
                         @endforeach
@@ -44,17 +48,13 @@
                     <label>الصندوق</label>
                     <select name="cash_box_id" required>
                         @foreach($cashBoxes as $box)
-                            <option value="{{ $box->id }}" @selected(old('cash_box_id') == $box->id or $box->is_main==1 )>
+                            <option value="{{ $box->id }}" @selected(old('cash_box_id') == $box->id or $box->is_main==1)>
                                 {{ $box->name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label>تاريخ الفاتورة</label>
-                    <input type="date" name="invoice_date" value="{{ old('invoice_date', now()->format('Y-m-d')) }}">
-                </div>
 
                 <div class="form-group">
                     <label>نوع الدفع</label>
@@ -64,24 +64,30 @@
                     </select>
                 </div>
 
-
+                <div class="form-group">
+                    <label>نوع المشتريات</label>
+                    <select id="purchase_type">
+                        <option value="parts">قطع</option>
+                        <option value="items">اجهزة</option>
+                    </select>
+                </div>
             </div>
 
-            {{-- جدول قطع المشتريات --}}
+            {{-- جدول المشتريات --}}
             <div class="parts-section">
-                <h3>قطع الشراء</h3>
+                <h3 id="section-title">القطع  </h3>
                 <table class="parts-table">
                     <thead>
                     <tr>
-                        <th>القطعة</th>
+                        <th>الصنف/القطعة</th>
                         <th>الكمية</th>
                         <th>سعر الشراء</th>
                         <th>الإجمالي</th>
                         <th>إضافة/حذف</th>
                     </tr>
                     </thead>
-                    <tbody id="parts-table">
-                    <tr>
+                    <tbody id="purchase-table">
+                    <tr class="purchase-row">
                         <td class="td-select">
                             <select name="parts[0][part_id]" class="part-select">
                                 <option value="">اختر القطعة</option>
@@ -136,7 +142,9 @@
 
     <script>
         window.parts = @json($parts);
+        window.items = @json($items ?? []);
+        window.itemUnits = @json($itemUnits ?? []);
     </script>
-    <script src="{{ asset('js/purchase.js') }}"></script>
 
+    <script src="{{ asset('js/purchase.js') }}"></script>
 </x-app-layout>

@@ -4,6 +4,7 @@ use App\Http\Controllers\CashBoxController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceTypeController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseInvoiceController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReceiptOutController;
 use App\Http\Controllers\RepairInvoiceController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\WarehouseController;
 use App\Models\Device;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('receipts_out', ReceiptOutController::class);
     Route::resource('warehouses', WarehouseController::class);
     Route::resource('purchase_invoices', PurchaseInvoiceController::class);
+    Route::resource('units', UnitController::class);
+    Route::resource('items', ItemController::class);
     Route::get('/api/customer-devices/{customer_id}', function($customer_id){
         return response()->json(Device::where('customer_id', $customer_id)->with('type')->get());
     });

@@ -45,7 +45,7 @@
 
                             <td>{{ number_format($invoice->total_amount, 2) }}</td>
                             <td class="text-green-700">{{ number_format($invoice->paid_amount, 2) }}</td>
-                            <td class="text-red-700">{{ number_format(number_format($invoice->total_amount, 2)-number_format($invoice->paid_amount, 2), 2) }}</td>
+                            <td class="text-red-700">{{  number_format($invoice->total_amount - $invoice->paid_amount, 2)}}</td>
 
                             <td>
                                 {{ $invoice->payment_status == 'cash' ? 'نقدي' : 'آجل' }}

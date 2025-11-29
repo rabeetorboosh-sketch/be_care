@@ -33,6 +33,26 @@
 
                 </li>
                 <li class="menu-item">
+                    <button class="dropdown-btn"> الـــــوحـــــدات </button>
+                    <ul class="submenu">
+
+                        <li><a href="{{route('units.create')}}"> إضافة وحـــــدة</a></li>
+                        <li><a href="{{route('units.index')}}">قائمة الوحــدات</a></li>
+
+                    </ul>
+
+                </li>
+                <li class="menu-item">
+                    <button class="dropdown-btn"> الاصــــــنــــاف </button>
+                    <ul class="submenu">
+
+                        <li><a href="{{route('items.create')}}"> إضافة صـــنــف</a></li>
+                        <li><a href="{{route('items.index')}}">قائمة الاصــنـاف</a></li>
+
+                    </ul>
+
+                </li>
+                <li class="menu-item">
                     <button class="dropdown-btn"> الـــعـــمــــلاء </button>
                     <ul class="submenu">
 
@@ -153,16 +173,7 @@
                     </ul>
 
                 </li>
-                <li class="menu-item">
-                    <button class="dropdown-btn"> سندات  الصرف  </button>
-                    <ul class="submenu">
 
-                        <li><a href="{{route('receipts_out.create')}}"> إضافة سنــد صــرف</a></li>
-                        <li><a href="{{route('receipts_out.index')}}">قائمة سندات القبض </a></li>
-
-                    </ul>
-
-                </li>
 
 
 
